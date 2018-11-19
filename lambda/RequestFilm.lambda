@@ -9,14 +9,22 @@ exports.handler = (event, context, callback) => {
         errorResponse('Authorization not configured', context.awsRequestId, callback);
         return;
     }
-
     const username = event.requestContext.authorizer.claims['cognito:username'];
     const requestBody = JSON.parse(event.body);
     console.log(requestBody);
+    let movieContent = null;
+    let movieId = null;
+    if (event.httpMethod == 'POST') {
+        movieContent = requestBody;
+        movieId = username + '_' + requestBody.id;
+    }
+    else {
+        movieId = requestBody.MovieID;
+        movieContent = requestBody.MovieContent;
+        console.log ('- - - - - - - Movie Content =', movieContent);
+    }
 
-    let movieId = username + '_' + requestBody.id;
-
-    recordMovie(movieId, username, requestBody).then(() => {
+    recordMovie(movieId, username, movieContent).then(() => {
         callback(null, {
         statusCode: 201,
             body: JSON.stringify({

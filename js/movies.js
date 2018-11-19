@@ -27,6 +27,7 @@ var movieScope = (function moviesScopeWrapper($) {
         $('#refreshMovies').click(handleMovieRefresh);
         $('#nextPage').click(handleMoviePaging);
         $('#addMovie').click(handleAddMovie);
+        $('#saveMovie').click(handleSaveMovie);
         $('#deleteMovie').click(handleDeleteMovie);
         $('#signOut').click(function() {
             MyMovies.signOut();
@@ -49,7 +50,7 @@ var movieScope = (function moviesScopeWrapper($) {
 
     function requestAddMovie(movieIdx) {
         var movie = currentMovieList[movieIdx];
-        movie.myrating = 5;
+        movie.rating = 5;
         movie.notes = 'No notes recorded yet.';
         movie.location = 'Statesboro AMC';
         movie.cost = '$5.00';
@@ -74,9 +75,42 @@ var movieScope = (function moviesScopeWrapper($) {
         alert('An error occured when adding your movie:\n' + jqXHR.responseText);
     }
 
+    function requestSaveMovie(movieIdx) {
+        let mrating = $('#rating').val();
+        let mnotes = $('#notes').val();
+        let mlocation = $('#location').val();
+        let mcost = $('#cost').val();
+
+        myCurrentMovies[movieIdx].rating = mrating;
+        myCurrentMovies[movieIdx].notes = mnotes;
+        myCurrentMovies[movieIdx].location = mlocation;
+        myCurrentMovies[movieIdx].cost = mcost;
+        myCurrentMovies[movieIdx].watched = '1';
+        var requestData = JSON.stringify(myCurrentMovies[movieIdx]);
+        $.ajax({
+            method: 'PUT',
+            url: _config.api.invokeUrl + '/movies',
+            headers: {
+                Authorization: authToken
+            },
+            data: requestData,
+            contentType: 'application/json',
+            success: completeRequest,
+            error: errorSaveMovie,
+        });
+    }
+
+    function errorSaveMovie (jqXHR, textStatus, errorThrown) {
+        console.error('Error saving movie: ', textStatus, ', Details: ', errorThrown);
+        console.error('Response: ', jqXHR.responseText);
+        alert('An error occured when saving your information:\n' + jqXHR.responseText);
+    }
+
     function requestDeleteMovie(movieId) {
         var requestContent = {
-            movieId: movieId
+            Key : {
+                'MovieID' : movieId
+            }
         };
         var requestData = JSON.stringify(requestContent);
         $.ajax({
@@ -87,7 +121,7 @@ var movieScope = (function moviesScopeWrapper($) {
             },
             data: requestData,
             contentType: 'application/json',
-            success: completeRequest,
+            success: completeDeleteRequest,
             error: errorDeleteMovie,
         });
     }
@@ -100,10 +134,16 @@ var movieScope = (function moviesScopeWrapper($) {
 
     function completeRequest(result) {
         console.log('Response received from API: ', result);
-        alert('Movie Added');
+        alert('Movie Saved');
         getMyMovies();
-
     }
+
+    function completeDeleteRequest(result) {
+        console.log('Response received from API: ', result);
+        alert('Movie Deleted');
+        getMyMovies();
+    }
+
     function getMyMovies() {
         $.ajax({
           method: 'GET',
@@ -141,7 +181,7 @@ var movieScope = (function moviesScopeWrapper($) {
             var imageURL = 'https://image.tmdb.org/t/p/w200/' + movies[x].MovieContent.poster_path;
             var tdImage = '<td><a href="javascript:showEditDetail(' + x + ')">' + '<img src="' + imageURL + '" class="imgList">' + '</a></td>';
             var tdTitle = '<td><a href="javascript:showEditDetail(' + x + ')">' + displayTitle + '</a></td>';
-            var tableRow = '<tr>' + tdImage + tdTitle + '<td>' + movies[x].MovieContent.myrating + '</td></tr>';
+            var tableRow = '<tr>' + tdImage + tdTitle + '<td>' + movies[x].MovieContent.rating + '</td></tr>';
             movieBody.append(tableRow);
         }
     }
@@ -206,6 +246,10 @@ var movieScope = (function moviesScopeWrapper($) {
       var movieIdx = $('#movieIdx').val();
       requestAddMovie(movieIdx);
     }
+    function handleSaveMovie(event) {
+        var movieIdx = $('#EditMovieIdx').val();
+        requestSaveMovie(movieIdx);
+    }
     function handleDeleteMovie(event) {
         var movieIdx = $('#EditMovieIdx').val();
         requestDeleteMovie(movieIdx);
@@ -246,7 +290,7 @@ function showEditDetail(movieIdx) {
     $("#rating").val(movie.rating);
     $("#notes").val(movie.notes);
     $("#modalEditMovieImage").attr("src",imageURL);
-    $('#EditMovieIdx').val(movie.id);
+    $('#EditMovieIdx').val(movieIdx);
     $('#modalEditTitle').text(movie.title);
     $('#editModal').modal('show');
 }

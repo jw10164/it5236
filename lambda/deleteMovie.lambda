@@ -11,7 +11,7 @@ exports.handler = (event, context, callback) => {
     const username = event.requestContext.authorizer.claims['cognito:username'];
     const requestBody = JSON.parse(event.body);
     console.log(requestBody);
-    let recordKey = username + '_' + requestBody.movieId;
+    let recordKey = username + '_' + requestBody.Key.MovieID;
 
     deleteMovie(recordKey).then(function (result) {
         callback(null, {
@@ -33,7 +33,9 @@ exports.handler = (event, context, callback) => {
 function deleteMovie(recordKey) {
     return ddb.delete({
         TableName: 'Movies',
-        Key: recordKey
+        Key: {
+            MovieID : recordKey
+        }
     }).promise();
 }
 

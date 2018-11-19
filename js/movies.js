@@ -2,11 +2,13 @@
 
 var MyMovies = window.MyMovies || {};
 var currentMovieList = null;
+var myCurrentMovies = null;
 
 var movieScope = (function moviesScopeWrapper($) {
   var currentPage = 1;
   var totalPages = 0;
   var totalMovies = 0;
+  var myTotalMovies = 0;
   var moviesYear = 0;
   var authToken;
     MyMovies.authToken.then(function setAuthToken(token) {
@@ -20,6 +22,31 @@ var movieScope = (function moviesScopeWrapper($) {
         alert(error);
         window.location.href = '/signin.html';
     });
+
+    $(function onDocReady() {
+        $('#refreshMovies').click(handleMovieRefresh);
+        $('#nextPage').click(handleMoviePaging);
+        $('#addMovie').click(handleAddMovie);
+        $('#deleteMovie').click(handleDeleteMovie);
+        $('#signOut').click(function() {
+            MyMovies.signOut();
+            alert("You have been signed out.");
+            window.location = "signin.html";
+        });
+        MyMovies.authToken.then(function updateAuthMessage(token) {
+            if (token) {
+                updateMenu();
+                getMovies();
+                getMyMovies();
+                $('.authToken').text(token);
+            }
+        });
+
+        if (!_config.api.invokeUrl) {
+            $('#noApiMessage').show();
+        }
+    });
+
     function requestAddMovie(movieIdx) {
         var movie = currentMovieList[movieIdx];
         movie.myrating = 5;
@@ -71,6 +98,8 @@ var movieScope = (function moviesScopeWrapper($) {
     function completeRequest(result) {
         console.log('Response received from API: ', result);
         alert('Movie Added');
+        getMyMovies();
+
     }
     function getMyMovies() {
         $.ajax({
@@ -92,14 +121,34 @@ var movieScope = (function moviesScopeWrapper($) {
     }
     function completeGetRequest(result) {
         console.log('Response received from API: ', result);
+        myCurrentMovies = result.data.Items;
+        myTotalMovies = result.data.Items.length;
+        var pageDesc = 'Total movies I have seen and rated: ' + myTotalMovies;
+        buildMyMoviesTable(myCurrentMovies);
+        applyDataTable();
+    }
+
+    function buildMyMoviesTable(movies) {
+        var movieBody = $('#MyMoviesBody');
+        movieBody.empty();
+        for (var x = 0; x < movies.length; x++) {
+            var displayTitle = jQuery.trim(movies[x].MovieContent.title).substring(0, 30);
+            if (movies[x].MovieContent.title.length > 30)
+                displayTitle += '...';
+            var imageURL = 'https://image.tmdb.org/t/p/w200/' + movies[x].MovieContent.poster_path;
+            var tdImage = '<td><a href="javascript:showEditDetail(' + x + ')">' + '<img src="' + imageURL + '" class="imgList">' + '</a></td>';
+            var tdTitle = '<td><a href="javascript:showEditDetail(' + x + ')">' + displayTitle + '</a></td>';
+            var tableRow = '<tr>' + tdImage + tdTitle + '<td>' + movies[x].MovieContent.myrating + '</td></tr>';
+            movieBody.append(tableRow);
+        }
     }
 
     function getMovies(year, page) {
         var defaultYear = '2018';
         var defaultPage = 1;
         var queryPage = page || defaultPage;
-        var queryYear = year || defaultYear;
         var MovieURL = 'https://api.themoviedb.org/3/discover/movie?api_key=826bba7bb62beb4e9303d0bb35751426&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=' + queryPage + '&primary_release_year=' + queryYear;
+        var queryYear = year || defaultYear;
         $('#movieYear').val(queryYear);
         moviesYear = queryYear;
         $.ajax({
@@ -117,8 +166,8 @@ var movieScope = (function moviesScopeWrapper($) {
 
     function movieCompleteRequest(result) {
       currentMovieList = result.results;
-      currentPage = result.page;
-      totalPages = result.total_pages;
+        totalPages = result.total_pages;
+        currentPage = result.page;
       totalMovies = result.total_results;
       var pageDesc = 'Page ' + currentPage + ' of ' + totalPages + ' (' + totalMovies + ' total movies in ' + moviesYear + ')';
       $('#pageDescription').text(pageDesc);
@@ -142,30 +191,6 @@ var movieScope = (function moviesScopeWrapper($) {
           movieBody.append(tableRow);
         }
     }
-
-    $(function onDocReady() {
-        $('#refreshMovies').click(handleMovieRefresh);
-        $('#nextPage').click(handleMoviePaging);
-        $('#addMovie').click(handleAddMovie);
-        $('#deleteMovie').click(handleDeleteMovie);
-        $('#signOut').click(function() {
-            MyMovies.signOut();
-            alert("You have been signed out.");
-            window.location = "signin.html";
-        });
-        MyMovies.authToken.then(function updateAuthMessage(token) {
-          if (token) {
-            updateMenu();
-            getMovies();
-            getMyMovies();
-            $('.authToken').text(token);
-          }
-        });
-
-        if (!_config.api.invokeUrl) {
-            $('#noApiMessage').show();
-        }
-    });
 
     function handleMovieRefresh(event) {
       var selectedMovieYear = parseInt($('#movieYear').val()) || 2018;
@@ -204,6 +229,25 @@ function showDetail(movieIdx) {
     $('#modalMovieDescription').text(movie.overview);
     $('#movieModal').modal('show');
 }
+
+function showEditDetail(movieIdx) {
+    var movie = myCurrentMovies[movieIdx].MovieContent;
+    console.log(movie);
+    var imageURL = 'https://image.tmdb.org/t/p/w200/' + movie.poster_path;
+    var videoAvailability = 'No';
+    if (movie.video)
+        videoAvailability = 'Yes';
+    $('#modalEditDescription').text(movie.overview);
+    $("#cost").val(movie.cost);
+    $("#location").val(movie.location);
+    $("#rating").val(movie.rating);
+    $("#notes").val(getGenres(movie.notes));
+    $("#modalEditMovieImage").attr("src",imageURL);
+    $('#EditMovieIdx').val(movie.id);
+    $('#modalEditTitle').text(movie.title);
+    $('#editModal').modal('show');
+}
+
 function getGenres (movieGenreArray) {
   var genres = [
     {

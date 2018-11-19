@@ -104,27 +104,14 @@
             <table id="MyMoviesTable"  style="width:100%" class="display">
                 <thead>
                 <tr>
-                    <th>Movie</th>
-                    <th>Popularity</th>
-                    <th>Date</th>
                     <th></th>
+                    <th>Movie</th>
+                    <th>My Rating</th>
+
                 </tr>
                 </tr>
                 </thead>
-                <tbody id="My MoviesBody">
-                <tr>
-                    <td>Movie One</td>
-                    <td>59</td>
-                    <td>10/10/2018</td>
-                    <td><button>Edit</button> <button id="deleteMovie">Delete</button></td>
-                </tr>
-                <tr>
-                    <td>Movie Two</td>
-                    <td>62</td>
-                    <td>11/11/2018</td>
-                    <td><button>Edit</button> <button>Delete</button></td>
-                </tr>
-                </tbody>
+                <tbody id="MyMoviesBody"></tbody>
             </table>
         </div>
     </div>
@@ -152,7 +139,55 @@
             <div class="modal-footer">
                 <input type="hidden" id="movieIdx" value="">
                 <button id="addMovie" type="button" class="btn btn-primary" data-dismiss="modal">Add Movie</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="editModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="modalEditTitle" class="modal-title"></h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="contact-box">
+                    <img id="modalEditMovieImage" alt="image" class="rounded-circle m-t-xs img-fluid" src="" align="right">
+                    <p id="modalEditDescription"></p>
+                    <form class="form-horizontal" action="/action_page.php">
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="cost">Cost:</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="cost" placeholder="$0.00">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="location">Location:</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="location" placeholder="Theatre">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="rating">Rating:</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="rating" placeholder="1-5">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="notes">Cost:</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="notes" placeholder="...">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input type="hidden" id="EditMovieIdx" value="">
+                <button id="editMovie" type="button" class="btn btn-primary" data-dismiss="modal">Save Movie</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Delete</button>
+                <button type="button" class="btn" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

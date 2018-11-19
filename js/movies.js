@@ -204,7 +204,7 @@ var movieScope = (function moviesScopeWrapper($) {
       requestAddMovie(movieIdx);
     }
     function handleDeleteMovie(event) {
-        var movieIdx = '363088';
+        var movieIdx = $('EditMovieIdx').val()';
         requestDeleteMovie(movieIdx);
     }
     function updateMenu() {
@@ -241,7 +241,7 @@ function showEditDetail(movieIdx) {
     $("#cost").val(movie.cost);
     $("#location").val(movie.location);
     $("#rating").val(movie.rating);
-    $("#notes").val(getGenres(movie.notes));
+    $("#notes").val(movie.notes);
     $("#modalEditMovieImage").attr("src",imageURL);
     $('#EditMovieIdx').val(movie.id);
     $('#modalEditTitle').text(movie.title);

@@ -74,8 +74,11 @@ var movieScope = (function moviesScopeWrapper($) {
         alert('An error occured when adding your movie:\n' + jqXHR.responseText);
     }
 
-    function requestDeleteMovie(movieIdx) {
-        var requestData = JSON.stringify(movieIdx);
+    function requestDeleteMovie(movieId) {
+        var requestContent = {
+            movieId: movieId
+        };
+        var requestData = JSON.stringify(requestContent);
         $.ajax({
             method: 'DELETE',
             url: _config.api.invokeUrl + '/movies',
@@ -204,7 +207,7 @@ var movieScope = (function moviesScopeWrapper($) {
       requestAddMovie(movieIdx);
     }
     function handleDeleteMovie(event) {
-        var movieIdx = $('EditMovieIdx').val()';
+        var movieIdx = $('#EditMovieIdx').val();
         requestDeleteMovie(movieIdx);
     }
     function updateMenu() {

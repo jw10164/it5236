@@ -31,7 +31,7 @@ exports.handler = (event, context, callback) => {
 };
 
 function deleteMovie(recordKey) {
-    return ddb.deleteItem({
+    return ddb.delete({
         TableName: 'Movies',
         Key: recordKey
     }).promise();

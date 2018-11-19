@@ -1,1 +1,1 @@
-aws s3 cp --profile jake /Users/sgw/documents/projects/it5236/js/$1 s3://it5236-walch/js/$1
+aws s3 cp  /Users/jacobwalch/documents/projects/it5236/js/$1 s3://it5236-walch/js/$1

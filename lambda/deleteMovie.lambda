@@ -1,0 +1,58 @@
+const AWS = require('aws-sdk');
+
+const ddb = new AWS.DynamoDB.DocumentClient();
+
+exports.handler = (event, context, callback) => {
+    if (!event.requestContext.authorizer) {
+        errorResponse('Authorization not configured', context.awsRequestId, callback);
+        return;
+    }
+
+    const username = event.requestContext.authorizer.claims['cognito:username'];
+    const requestBody = JSON.parse(event.body);
+    console.log(requestBody);
+    let recordKey = username + '_' + requestBody.movieId;
+
+    deleteMovie(recordKey).then(function (result) {
+        callback(null, {
+            statusCode: 201,
+            body: JSON.stringify({
+                Username: username,
+                data: result
+            }),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+            },
+        });
+    }).catch((err) => {
+        console.error(err);
+    errorResponse(err.message, context.awsRequestId, callback)
+});
+};
+
+function deleteMovie(recordKey) {
+    return ddb.deleteItem({
+        TableName: 'Movies',
+        Key: recordKey
+    }).promise();
+}
+
+function toUrlString(buffer) {
+    return buffer.toString('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
+}
+
+function errorResponse(errorMessage, awsRequestId, callback) {
+    callback(null, {
+        statusCode: 500,
+        body: JSON.stringify({
+            Error: errorMessage,
+            Reference: awsRequestId,
+        }),
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+        },
+    });
+}

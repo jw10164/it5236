@@ -1,4 +1,3 @@
-/*global MyMovies _config AmazonCognitoIdentity AWSCognito*/
 
 var MyMovies = window.MyMovies || {};
 
@@ -46,11 +45,6 @@ var MyMovies = window.MyMovies || {};
             resolve(null);
         }
     });
-
-
-    /*
-     * Cognito User Pool functions
-     */
 
     function register(email, password, onSuccess, onFailure) {
         var dataEmail = {
@@ -100,9 +94,6 @@ var MyMovies = window.MyMovies || {};
         });
     }
 
-    /*
-     *  Event Handlers
-     */
 
     $(function onDocReady() {
         $('#signinForm').submit(handleSignin);

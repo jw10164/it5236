@@ -42,10 +42,32 @@ var movieScope = (function moviesScopeWrapper($) {
     }
 
     function errorAddMovie (jqXHR, textStatus, errorThrown) {
-      console.error('Error saving movie: ', textStatus, ', Details: ', errorThrown);
-      console.error('Response: ', jqXHR.responseText);
-      alert('An error occured when adding your movie:\n' + jqXHR.responseText);
+        console.error('Error saving movie: ', textStatus, ', Details: ', errorThrown);
+        console.error('Response: ', jqXHR.responseText);
+        alert('An error occured when adding your movie:\n' + jqXHR.responseText);
     }
+
+    function requestDeleteMovie(movieIdx) {
+        var requestData = JSON.stringify(movieIdx);
+        $.ajax({
+            method: 'DELETE',
+            url: _config.api.invokeUrl + '/movies',
+            headers: {
+                Authorization: authToken
+            },
+            data: requestData,
+            contentType: 'application/json',
+            success: completeRequest,
+            error: errorDeleteMovie,
+        });
+    }
+
+    function errorDeleteMovie (jqXHR, textStatus, errorThrown) {
+        console.error('Error deleting movie: ', textStatus, ', Details: ', errorThrown);
+        console.error('Response: ', jqXHR.responseText);
+        alert('An error occured when deleting your movie:\n' + jqXHR.responseText);
+    }
+
     function completeRequest(result) {
         console.log('Response received from API: ', result);
         alert('Movie Added');
@@ -125,6 +147,7 @@ var movieScope = (function moviesScopeWrapper($) {
         $('#refreshMovies').click(handleMovieRefresh);
         $('#nextPage').click(handleMoviePaging);
         $('#addMovie').click(handleAddMovie);
+        $('#deleteMovie').click(handleDeleteMovie);
         $('#signOut').click(function() {
             MyMovies.signOut();
             alert("You have been signed out.");
@@ -154,6 +177,10 @@ var movieScope = (function moviesScopeWrapper($) {
     function handleAddMovie(event) {
       var movieIdx = $('#movieIdx').val();
       requestAddMovie(movieIdx);
+    }
+    function handleDeleteMovie(event) {
+        var movieIdx = '363088';
+        requestDeleteMovie(movieIdx);
     }
     function updateMenu() {
 

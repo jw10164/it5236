@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="it5236 Project">
+    <meta name="author" content="Jake Walch">
+    <title>Manage Movies</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/datatables.min.css" rel="stylesheet">
+    <link href="css/normalize.css" rel="stylesheet">
+    <link href="css/movies.css" rel="stylesheet">
+</head>
+
+<body>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+    <div class="container">
+        <a class="navbar-brand" href="/index.html">Jake's Movie Site</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/index.html">Home
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/register.html">Register</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/movies.html">Movies</a>
+                </li>
+                <li class="nav-item">
+                    <a id="signOut" class="nav-link" href="#">Sign out</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Page Content -->
+<div class="container">
+    <div id="noApiMessage" class="configMessage" style="display: none;">
+        <div class="backdrop"></div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Successfully Authenticated!</h3>
+            </div>
+            <div class="panel-body">
+                <p>This page is not functional yet because there is no API configured.</p>
+            </div>
+        </div>
+    </div>
+    <div id="noCognitoMessage" class="configMessage" style="display: none;">
+        <div class="backdrop"></div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">No Cognito User Pool Configured</h3>
+            </div>
+            <div class="panel-body">
+                <p>There is no user pool configured in <a href="/js/config.js">/js/config.js</a>.</p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div>
+                <p>Select from the table below the movies you would like to add to your personal list.</p>
+                <form id="listMoviesForm" role="form">
+                    <div class="form-group">
+                        <label>Year</label>
+                        <input id="movieYear" type="text" maxlength="4" placeholder="Year" class="year-entry">
+                        <button id="refreshMovies" class="btn btn-sm btn-primary m-t-n-xs" type="button"><strong>Refresh List</strong></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <table id="MoviesTable" style="width:100%" class="display">
+                <thead>
+                <tr>
+                    <th>Movie</th>
+                    <th>Rating</th>
+                    <th>Date</th>
+                </tr>
+                </thead>
+                <tbody id="MoviesBody"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3">
+                            <hr/>
+                            <span id="pageDescription"></span>
+                            <button id="nextPage" class="btn btn-sm btn-primary float-right m-t-n-xs" type="button"><strong>Next Page</strong></button>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="col-sm-6">
+            <table id="MyMoviesTable"  style="width:100%" class="display">
+                <thead>
+                <tr>
+                    <th>Movie</th>
+                    <th>Popularity</th>
+                    <th>Date</th>
+                    <th></th>
+                </tr>
+                </tr>
+                </thead>
+                <tbody id="My MoviesBody">
+                <tr>
+                    <td>Movie One</td>
+                    <td>59</td>
+                    <td>10/10/2018</td>
+                    <td><button>Edit</button> <button>Delete</button></td>
+                </tr>
+                <tr>
+                    <td>Movie Two</td>
+                    <td>62</td>
+                    <td>11/11/2018</td>
+                    <td><button>Edit</button> <button>Delete</button></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- Movie Detail Modal -->
+<div class="modal" id="movieModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="modalMovieTitle" class="modal-title"></h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="contact-box">
+                    <img id="modalMovieImage" alt="image" class="rounded-circle m-t-xs img-fluid" src="" align="right">
+                    <p id="modalMovieDescription"></p>
+                    <p>
+                        <strong>Movie Details</strong><br>
+                        Available on video? <span id="modalVideo"></span> <br>
+                        Popularity rating: <span id="modalPopularity"></span><br>
+                        Original Language: <span id="modalLanguage"></span><br>
+                        Genre(s): <span id="modalGenres"></span>
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input type="hidden" id="movieIdx" value="">
+                <button id="addMovie" type="button" class="btn btn-primary" data-dismiss="modal">Add Movie</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="js/vendor/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="js/vendor/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/vendor/datatables.min.js"></script>
+<script type="text/javascript" src="js/vendor/aws-cognito-sdk.min.js"></script>
+<script type="text/javascript" src="js/vendor/amazon-cognito-identity.min.js"></script>
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/cognito-auth.js"></script>
+<script type="text/javascript" src="js/movies.js"></script>
+</body>
+
+</html>

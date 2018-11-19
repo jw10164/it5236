@@ -1,0 +1,7 @@
+aws lambda add-permission \
+--profile jake \
+--function-name RequestFilm \
+--statement-id RequestFilmID1 \
+--action lambda:InvokeFunction \
+--principal apigateway.amazonaws.com \
+--source-arn "arn:aws:execute-api:us-east-1:977452265016:5ajr7kufcd/*/POST/RequestFilm"

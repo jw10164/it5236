@@ -1,0 +1,76 @@
+const AWS = require('aws-sdk');
+const ddb = new AWS.DynamoDB.DocumentClient();
+
+exports.handler = (event, context, callback) => {
+    if (!event.requestContext.authorizer) {
+        errorResponse('Authorization not configured', context.awsRequestId, callback);
+        return;
+    }
+    const username = event.requestContext.authorizer.claims['cognito:username'];
+    const requestBody = JSON.parse(event.body);
+
+    let movieId = requestBody.MovieID;
+    let movieContent = requestBody.MovieContent;
+
+    saveMovie(movieId, movieContent).then( function (result) {
+        callback(null, {
+            statusCode: 201,
+            body: JSON.stringify({
+                MovieId: movieId,
+                Username: username,
+                data: result
+            }),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+            },
+        });
+    }).catch((err) => {
+        console.error(err);
+    errorResponse(err.message, context.awsRequestId, callback)
+}   );
+};
+
+function saveMovie(movieId, movieContent) {
+    let updateValues = {
+        'location': {
+            Action: 'PUT',
+            Value: movieContent.location
+        },
+        'cost': {
+            Action: 'PUT',
+            Value: movieContent.cost
+        },
+        'notes': {
+            Action: 'PUT',
+            Value: movieContent.notes
+        },
+        'rating': {
+            Action: 'PUT',
+            Value: movieContent.rating
+        },
+        'recommend': {
+            Action: 'PUT',
+            Value: movieContent.recommend
+        }
+    };
+    return ddb.update({
+        TableName: 'Movies',
+        Key: {
+            MovieID: movieId
+        },
+        AttributeUpdates: updateValues
+    }).promise();
+}
+
+function errorResponse(errorMessage, awsRequestId, callback) {
+    callback(null, {
+        statusCode: 500,
+        body: JSON.stringify({
+            Error: errorMessage,
+            Reference: awsRequestId,
+        }),
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+        },
+    });
+}

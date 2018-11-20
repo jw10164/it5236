@@ -50,11 +50,6 @@ var movieScope = (function moviesScopeWrapper($) {
 
     function requestAddMovie(movieIdx) {
         var movie = currentMovieList[movieIdx];
-        movie.rating = 5;
-        movie.notes = 'No notes recorded yet.';
-        movie.location = 'Statesboro AMC';
-        movie.cost = '$5.00';
-        movie.watched = '1';
         var requestData = JSON.stringify(movie);
         $.ajax({
             method: 'POST',
@@ -76,28 +71,51 @@ var movieScope = (function moviesScopeWrapper($) {
     }
 
     function requestSaveMovie(movieIdx) {
-        let mrating = $('#rating').val();
-        let mnotes = $('#notes').val();
-        let mlocation = $('#location').val();
-        let mcost = $('#cost').val();
+        var valiData = false;
+        var mrating = $('#rating').val();
+        var mnotes = $('#notes').val() || ' ';
+        var mlocation = $('#location').val() || ' ';
+        var mcost = $('#cost').val();
+        var mrecommend = $('#recommend').val() || 'N';
+        valiData = validateInputData(mrating, mcost);
+        if (!valiData) {
+            myCurrentMovies[movieIdx].MovieContent.rating = mrating;
+            myCurrentMovies[movieIdx].MovieContent.notes = mnotes;
+            myCurrentMovies[movieIdx].MovieContent.location = mlocation;
+            myCurrentMovies[movieIdx].MovieContent.cost = mcost;
+            myCurrentMovies[movieIdx].MovieContent.recommend = mrecommend;
+            var requestData = JSON.stringify(myCurrentMovies[movieIdx]);
+            $.ajax({
+                method: 'PUT',
+                url: _config.api.invokeUrl + '/movies',
+                headers: {
+                    Authorization: authToken
+                },
+                data: requestData,
+                contentType: 'application/json',
+                success: completeRequest,
+                error: errorSaveMovie,
+            });
+        }
+        else {
+            alert (valiData);
+        }
+    }
 
-        myCurrentMovies[movieIdx].rating = mrating;
-        myCurrentMovies[movieIdx].notes = mnotes;
-        myCurrentMovies[movieIdx].location = mlocation;
-        myCurrentMovies[movieIdx].cost = mcost;
-        myCurrentMovies[movieIdx].watched = '1';
-        var requestData = JSON.stringify(myCurrentMovies[movieIdx]);
-        $.ajax({
-            method: 'PUT',
-            url: _config.api.invokeUrl + '/movies',
-            headers: {
-                Authorization: authToken
-            },
-            data: requestData,
-            contentType: 'application/json',
-            success: completeRequest,
-            error: errorSaveMovie,
-        });
+    function validateInputData (rating, cost, recommend) {
+        var returnValue = null;
+        var myRating = parseInt(rating);
+        var myCost = parseFloat(cost);
+        var myRecommendation = recommend;
+        if (myRating < 1 || myRating > 5)
+            returnValue = 'Invalid rating. The value must be between 1 and 5.';
+        else if (myCost < 0 || myCost > 99.99)
+            returnValue = 'Invalid cost. The value cannot exceed $99.99.';
+        else {
+            if (myRecommendation != 'Y' && myRecommendation != 'N')
+                returnValue = 'Invalid. Recommendation must be "Y" or "N".';
+        }
+        return returnValue;
     }
 
     function errorSaveMovie (jqXHR, textStatus, errorThrown) {
@@ -175,13 +193,14 @@ var movieScope = (function moviesScopeWrapper($) {
         var movieBody = $('#MyMoviesBody');
         movieBody.empty();
         for (var x = 0; x < movies.length; x++) {
+            var myRating = movies[x].rating || 'NR';
             var displayTitle = jQuery.trim(movies[x].MovieContent.title).substring(0, 30);
             if (movies[x].MovieContent.title.length > 30)
                 displayTitle += '...';
             var imageURL = 'https://image.tmdb.org/t/p/w200/' + movies[x].MovieContent.poster_path;
             var tdImage = '<td><a href="javascript:showEditDetail(' + x + ')">' + '<img src="' + imageURL + '" class="imgList">' + '</a></td>';
             var tdTitle = '<td><a href="javascript:showEditDetail(' + x + ')">' + displayTitle + '</a></td>';
-            var tableRow = '<tr>' + tdImage + tdTitle + '<td>' + movies[x].MovieContent.rating + '</td></tr>';
+            var tableRow = '<tr>' + tdImage + tdTitle + '<td>' + myRating + '</td></tr>';
             movieBody.append(tableRow);
         }
     }
@@ -278,20 +297,21 @@ function showDetail(movieIdx) {
 }
 
 function showEditDetail(movieIdx) {
-    var movie = myCurrentMovies[movieIdx].MovieContent;
+    var movie = myCurrentMovies[movieIdx];
     console.log(movie);
-    var imageURL = 'https://image.tmdb.org/t/p/w200/' + movie.poster_path;
+    var imageURL = 'https://image.tmdb.org/t/p/w200/' + movie.MovieContent.poster_path;
     var videoAvailability = 'No';
-    if (movie.video)
+    if (movie.MovieContent.video)
         videoAvailability = 'Yes';
-    $('#modalEditDescription').text(movie.overview);
+    $('#modalEditDescription').text(movie.MovieContent.overview);
     $("#cost").val(movie.cost);
     $("#location").val(movie.location);
     $("#rating").val(movie.rating);
     $("#notes").val(movie.notes);
+    $("#recommend").val(movie.recommend);
     $("#modalEditMovieImage").attr("src",imageURL);
     $('#EditMovieIdx').val(movieIdx);
-    $('#modalEditTitle').text(movie.title);
+    $('#modalEditTitle').text(movie.MovieContent.title);
     $('#editModal').modal('show');
 }
 

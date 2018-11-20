@@ -1,7 +1,4 @@
-const randomBytes = require('crypto').randomBytes;
-
 const AWS = require('aws-sdk');
-
 const ddb = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = (event, context, callback) => {
@@ -12,24 +9,16 @@ exports.handler = (event, context, callback) => {
     const username = event.requestContext.authorizer.claims['cognito:username'];
     const requestBody = JSON.parse(event.body);
     console.log(requestBody);
-    let movieContent = null;
-    let movieId = null;
-    if (event.httpMethod == 'POST') {
-        movieContent = requestBody;
-        movieId = username + '_' + requestBody.id;
-    }
-    else {
-        movieId = requestBody.MovieID;
-        movieContent = requestBody.MovieContent;
-        console.log ('- - - - - - - Movie Content =', movieContent);
-    }
+    let movieContent = requestBody;
+    let movieId = username + '_' + requestBody.id;
 
-    recordMovie(movieId, username, movieContent).then(() => {
+    recordMovie(movieId, username, movieContent).then( function (result) {
         callback(null, {
         statusCode: 201,
             body: JSON.stringify({
             MovieId: movieId,
             Username: username,
+            data: result
         }),
             headers: {
             'Access-Control-Allow-Origin': '*',
@@ -37,9 +26,8 @@ exports.handler = (event, context, callback) => {
     });
 }).catch((err) => {
         console.error(err);
-
-    errorResponse(err.message, context.awsRequestId, callback)
-});
+        errorResponse(err.message, context.awsRequestId, callback)
+}   );
 };
 
 function recordMovie(movieId, username, movieContent) {

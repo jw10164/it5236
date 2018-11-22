@@ -77,7 +77,7 @@ var movieScope = (function moviesScopeWrapper($) {
         var mlocation = $('#location').val() || ' ';
         var mcost = $('#cost').val();
         var mrecommend = $('#recommend').val() || 'N';
-        valiData = validateInputData(mrating, mcost);
+        valiData = validateInputData(mrating, mcost, mrecommend);
         if (!valiData) {
             myCurrentMovies[movieIdx].MovieContent.rating = mrating;
             myCurrentMovies[movieIdx].MovieContent.notes = mnotes;
@@ -96,9 +96,11 @@ var movieScope = (function moviesScopeWrapper($) {
                 success: completeRequest,
                 error: errorSaveMovie,
             });
+            return true;
         }
         else {
             alert (valiData);
+            return false;
         }
     }
 
@@ -107,24 +109,26 @@ var movieScope = (function moviesScopeWrapper($) {
         var myRating = parseInt(rating);
         var myCost = parseFloat(cost);
         var myRecommendation = recommend;
-        if (myRating < 1 || myRating > 5)
+        if (! IsNumeric(myRating) || myRating < 1 || myRating > 5)
             returnValue = 'Invalid rating. The value must be between 1 and 5.';
-        else if (myCost < 0 || myCost > 99.99)
+        else if (! IsNumeric(myCost) || myCost < 0 || myCost > 99.99)
             returnValue = 'Invalid cost. The value cannot exceed $99.99.';
-        else {
-            if (myRecommendation != 'Y' && myRecommendation != 'N')
+        else if (myRecommendation != 'Y' && myRecommendation != 'N')
                 returnValue = 'Invalid. Recommendation must be "Y" or "N".';
-        }
         return returnValue;
     }
-
+    function IsNumeric(input)
+    {
+        return (input - 0) == input && (''+input).trim().length > 0;
+    }
     function errorSaveMovie (jqXHR, textStatus, errorThrown) {
         console.error('Error saving movie: ', textStatus, ', Details: ', errorThrown);
         console.error('Response: ', jqXHR.responseText);
         alert('An error occured when saving your information:\n' + jqXHR.responseText);
     }
 
-    function requestDeleteMovie(movieId) {
+    function requestDeleteMovie(movieIdx) {
+        var movieId = myCurrentMovies[movieIdx].MovieContent.id;
         var requestContent = {
             Key : {
                 'MovieID' : movieId
@@ -152,14 +156,15 @@ var movieScope = (function moviesScopeWrapper($) {
 
     function completeRequest(result) {
         console.log('Response received from API: ', result);
-        alert('Movie Saved');
+        $('#editModal').modal('hide');
         getMyMovies();
+        alert('Movie Saved');
     }
 
     function completeDeleteRequest(result) {
         console.log('Response received from API: ', result);
-        alert('Movie Deleted');
         getMyMovies();
+        alert('Movie Deleted');
     }
 
     function getMyMovies() {

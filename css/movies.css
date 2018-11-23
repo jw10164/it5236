@@ -3,6 +3,19 @@ html, body, #main, #map {
     margin: 0;
     height: 100%;
     width: 100%;
+    background: lightyellow;
+    background-image: url(movies5.jpg);
+    color: white;
+
+}
+label {
+    color: white;
+
+}
+
+td {
+    color: white;
+    background-color: #343a40;
 }
 
 .info {
@@ -20,9 +33,9 @@ html, body, #main, #map {
 
 #request {
     position: relative;
-    background: #fcc1d4 none repeat scroll 0 0;
-    color: #000;
-    border-color: #000;
+    background: #000c5e none repeat scroll 0 0;
+    color: #650003;
+    border-color: rgba(100, 100, 100, 0.38);
     border-radius: 5px;
     text-align: center;
     width: 135px;
@@ -67,4 +80,23 @@ html, body, #main, #map {
 
 .imgList {
     max-width: 40px;
+}
+
+#MyMoviesTable_info, #MyMoviesTable_next, #MyMoviesTable_previous {
+    color: white;
+}
+
+.modal-body {
+    background-color: #23272b;
+    color: white;
+}
+
+.modal-description {
+    background-color: #23272b;
+    color: white;
+}
+
+.modal-content {
+    background-color: #23272b;
+    color: white;
 }

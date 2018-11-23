@@ -191,7 +191,7 @@ var movieScope = (function moviesScopeWrapper($) {
         myTotalMovies = result.data.Items.length;
         var pageDesc = 'Total movies I have seen and rated: ' + myTotalMovies;
         buildMyMoviesTable(myCurrentMovies);
-        applyDataTable();
+        //applyDataTable();
     }
 
     function buildMyMoviesTable(movies) {
@@ -239,7 +239,7 @@ var movieScope = (function moviesScopeWrapper($) {
       var pageDesc = 'Page ' + currentPage + ' of ' + totalPages + ' (' + totalMovies + ' total movies in ' + moviesYear + ')';
       $('#pageDescription').text(pageDesc);
       buildMoviesTable(currentMovieList);
-      applyDataTable();
+      //applyDataTable();
     }
 
     function applyDataTable() {
